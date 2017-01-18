@@ -84,6 +84,16 @@ config MTD_PHYSMAP_OF_VERSATILE
 	  platforms, basically to add a VPP (write protection) callback so
 	  the flash can be taken out of write protection.
 
+config MTD_PHYSMAP_OF_GEMINI
+	bool "Support Gemini physmap OF"
+	depends on MTD_PHYSMAP_OF
+	depends on MFD_SYSCON
+	default ARCH_GEMINI
+	help
+	  This provides some extra DT physmap parsing for the Gemini
+	  platforms, some detection and setting up parallel mode on the
+	  external interface.
+
 config MTD_PMC_MSP_EVM
 	tristate "CFI Flash device mapped on PMC-Sierra MSP"
 	depends on PMC_MSP && MTD_CFI
