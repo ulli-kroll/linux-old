@@ -1,0 +1,68 @@
+/*
+ * Device Tree file for the Gemini-based Raidsonic NAS IB-4220-B
+ */
+
+/dts-v1/;
+
+#include "gemini.dtsi"
+#include <dt-bindings/input/input.h>
+
+/ {
+	model = "Raidsonic NAS IB-4220-B";
+	compatible = "raidsonic,ib-4220-b", "cortina,gemini";
+	#address-cells = <1>;
+	#size-cells = <1>;
+
+	memory { /* 128 MB */
+		device_type = "memory";
+		reg = <0x00000000 0x8000000>;
+	};
+
+	chosen {
+		bootargs = "console=ttyS0,115200n8";
+		stdout-path = &uart0;
+	};
+
+	gpio_keys {
+		compatible = "gpio-keys";
+		#address-cells = <1>;
+		#size-cells = <0>;
+
+		button@29 {
+			debounce_interval = <50>;
+			wakeup-source;
+			linux,code = <KEY_SETUP>;
+			label = "Backup button";
+			gpios = <&gpio1 29 GPIO_ACTIVE_LOW>;
+		};
+		button@31 {
+			debounce_interval = <50>;
+			wakeup-source;
+			linux,code = <KEY_RESTART>;
+			label = "Softreset button";
+			gpios = <&gpio1 31 GPIO_ACTIVE_LOW>;
+		};
+	};
+
+	leds {
+		compatible = "gpio-leds";
+		led@28 {
+			label = "nas4220b:orange:hdd";
+			gpios = <&gpio1 28 GPIO_ACTIVE_HIGH>;
+			default-state = "on";
+		};
+		led@30 {
+			label = "nas4220b:green:os";
+			gpios = <&gpio1 30 GPIO_ACTIVE_HIGH>;
+			default-state = "on";
+			linux,default-trigger = "heartbeat";
+		};
+	};
+
+	flash@30000000 {
+		status = "okay";
+		/* 16MB of flash */
+		reg = <0x30000000 0x01000000>;
+		/* TODO: add flash partitions here */
+	};
+};
