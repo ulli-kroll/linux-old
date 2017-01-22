@@ -33,6 +33,12 @@
 		};
 	};
 
+	watchdog@41000000 {
+		compatible = "cortina,gemini-watchdog";
+		reg = <0x41000000 0x1000>;
+		interrupts = <3 IRQ_TYPE_LEVEL_HIGH>;
+	};
+
 	timer@43000000 {
 		compatible = "cortina,gemini-timer";
 		reg = <0x43000000 0x1000>;
