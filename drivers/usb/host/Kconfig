@@ -386,6 +386,7 @@ config USB_FOTG210_HCD
 config USB_FOTG210_OF
 	tristate "FOTG210 DT dual role support"
 	depends on USB_FOTG210_HCD
+	select MFD_SYSCON
 	---help---
 	  Devicetree binding to support dual role mode on FOTG210
 
