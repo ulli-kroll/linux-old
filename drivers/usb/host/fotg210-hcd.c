@@ -45,6 +45,7 @@
 #include <linux/platform_device.h>
 #include <linux/io.h>
 #include <linux/fotg210_of.h>
+#include <linux/clk.h>
 
 #include <asm/byteorder.h>
 #include <asm/irq.h>
@@ -5647,7 +5648,7 @@ static int fotg210_hcd_probe(struct platform_device *pdev)
 	hcd->regs = devm_ioremap_resource(&pdev->dev, res);
 	if (IS_ERR(hcd->regs)) {
 		retval = PTR_ERR(hcd->regs);
-		goto failed;
+		goto failed_put_hcd;
 	}
 
 	hcd->rsrc_start = res->start;
@@ -5657,22 +5658,35 @@ static int fotg210_hcd_probe(struct platform_device *pdev)
 
 	fotg210->caps = hcd->regs;
 
+	/* It's OK not to supply this clock */
+	fotg210->pclk = clk_get(dev, "PCLK");
+	if (!IS_ERR(fotg210->pclk)) {
+		retval = clk_prepare_enable(fotg210->pclk);
+		if (retval) {
+			dev_err(dev, "failed to enable PCLK\n");
+			goto failed_dis_clk;
+		}
+	}
+
 	retval = fotg210_setup(hcd);
 	if (retval)
-		goto failed;
+		goto failed_dis_clk;
 
 	fotg210_init(fotg210);
 
 	retval = usb_add_hcd(hcd, irq, IRQF_SHARED);
 	if (retval) {
 		dev_err(dev, "failed to add hcd with err %d\n", retval);
-		goto failed;
+		goto failed_dis_clk;
 	}
 	device_wakeup_enable(hcd->self.controller);
 
 	return retval;
 
-failed:
+failed_dis_clk:
+	if (!IS_ERR(fotg210->pclk))
+		clk_disable_unprepare(fotg210->pclk);
+failed_put_hcd:
 	usb_put_hcd(hcd);
 fail_create_hcd:
 	dev_err(dev, "init %s fail, %d\n", dev_name(dev), retval);
@@ -5688,6 +5702,10 @@ static int fotg210_hcd_remove(struct platform_device *pdev)
 {
 	struct device *dev = &pdev->dev;
 	struct usb_hcd *hcd = dev_get_drvdata(dev);
+	struct fotg210_hcd *fotg210 = hcd_to_fotg210(hcd);
+
+	if (!IS_ERR(fotg210->pclk))
+		clk_disable_unprepare(fotg210->pclk);
 
 	if (!hcd)
 		return 0;
