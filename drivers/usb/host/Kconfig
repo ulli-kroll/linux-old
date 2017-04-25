@@ -383,6 +383,12 @@ config USB_FOTG210_HCD
 	  To compile this driver as a module, choose M here: the
 	  module will be called fotg210-hcd.
 
+config USB_FOTG210_OF
+	tristate "FOTG210 DT dual role support"
+	depends on USB_FOTG210_HCD
+	---help---
+	  Devicetree binding to support dual role mode on FOTG210
+
 config USB_MAX3421_HCD
 	tristate "MAX3421 HCD (USB-over-SPI) support"
 	depends on USB && SPI
