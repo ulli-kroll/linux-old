@@ -44,6 +44,7 @@
 #include <linux/uaccess.h>
 #include <linux/platform_device.h>
 #include <linux/io.h>
+#include <linux/fotg210_of.h>
 
 #include <asm/byteorder.h>
 #include <asm/irq.h>
@@ -5590,6 +5591,7 @@ static void fotg210_init(struct fotg210_hcd *fotg210)
  */
 static int fotg210_hcd_probe(struct platform_device *pdev)
 {
+	struct fotg210_usb2_platform_data *pdata;
 	struct device *dev = &pdev->dev;
 	struct usb_hcd *hcd;
 	struct resource *res;
@@ -5599,6 +5601,26 @@ static int fotg210_hcd_probe(struct platform_device *pdev)
 
 	if (usb_disabled())
 		return -ENODEV;
+
+	/* Need platform data for setup */
+	pdata = dev_get_platdata(&pdev->dev);
+	if (!pdata) {
+		dev_err(&pdev->dev,
+			"No platform data for %s.\n", dev_name(&pdev->dev));
+		return -ENODEV;
+	}
+
+	/*
+	 * This is a host mode driver, verify that we're supposed to be
+	 * in host mode.
+	 */
+
+	if (!pdata->operating_mode == FOTG210_DR_HOST) {
+		dev_err(&pdev->dev,
+			"Non Host Mode configured for %s. Wrong driver linked.\n",
+			dev_name(&pdev->dev));
+		return -ENODEV;
+	}
 
 	pdev->dev.power.power_state = PMSG_ON;
 

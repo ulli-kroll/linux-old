@@ -78,5 +78,5 @@ obj-$(CONFIG_USB_EHCI_FSL)	+= fsl-mph-dr-of.o
 obj-$(CONFIG_USB_EHCI_FSL)	+= ehci-fsl.o
 obj-$(CONFIG_USB_HCD_BCMA)	+= bcma-hcd.o
 obj-$(CONFIG_USB_HCD_SSB)	+= ssb-hcd.o
-obj-$(CONFIG_USB_FOTG210_HCD)	+= fotg210-hcd.o
+obj-$(CONFIG_USB_FOTG210_HCD)	+= fotg210-hcd.o fotg210-dr-of.o
 obj-$(CONFIG_USB_MAX3421_HCD)	+= max3421-hcd.o

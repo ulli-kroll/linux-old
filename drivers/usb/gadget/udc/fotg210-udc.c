@@ -18,6 +18,7 @@
 #include <linux/platform_device.h>
 #include <linux/usb/ch9.h>
 #include <linux/usb/gadget.h>
+#include <linux/fotg210_of.h>
 
 #include "fotg210.h"
 
@@ -1080,6 +1081,7 @@ static int fotg210_udc_remove(struct platform_device *pdev)
 static int fotg210_udc_probe(struct platform_device *pdev)
 {
 	struct resource *res, *ires;
+	struct fotg210_usb2_platform_data *pdata;
 	struct fotg210_udc *fotg210 = NULL;
 	struct fotg210_ep *_ep[FOTG210_MAX_NUM_EP];
 	int ret = 0;
@@ -1109,6 +1111,15 @@ static int fotg210_udc_probe(struct platform_device *pdev)
 		if (_ep[i] == NULL)
 			goto err_alloc;
 		fotg210->ep[i] = _ep[i];
+	}
+
+	if (pdata->operating_mode == FOTG210_DR_DEVICE) {
+		if (!request_mem_region(res->start, resource_size(res),
+					udc_name)) {
+			pr_err("request mem region for %s failed\n", pdev->name);
+			ret = -EBUSY;
+			goto err_alloc;
+		}
 	}
 
 	fotg210->reg = ioremap(res->start, resource_size(res));
